@@ -1,8 +1,8 @@
 package by.khrapovitsky.activity;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -27,14 +27,14 @@ public class UpdateNoteActivity extends AppCompatActivity implements View.OnClic
     Note note = null;
     String index = null;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_note);
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle("Update note");
         }
         noteText = (EditText) findViewById(R.id.noteTextUpdate);
         dateModify = (EditText) findViewById(R.id.dateModifyUpdate);

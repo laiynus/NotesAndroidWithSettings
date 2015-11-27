@@ -1,13 +1,12 @@
 package by.khrapovitsky.activity;
 
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,7 +21,17 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 
@@ -33,12 +42,16 @@ import by.khrapovitsky.model.NoteRepository;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    public final static int REQ_CODE_CHILD = 1;
+    public final static int REQ_CODE_CHILD_UPDATE = 1;
+    public final static int REQ_CODE_CHILD_SETTINGS = 2;
 
     private List<Note> notes = NoteRepository.GetNotes();
     ArrayAdapter<Note> adapter = null;
     Button createButton = null;
+    Button requestButton = null;
     EditText noteText = null;
+    private  final String URL = "http://192.168.43.102:8080/servertime/time/getservertime";
+    private String date;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +68,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         noteText = (EditText) findViewById(R.id.noteText);
         createButton = (Button) findViewById(R.id.action_create);
         createButton.setOnClickListener(this);
+        requestButton = (Button) findViewById(R.id.getServerTimeButton);
+        requestButton.setOnClickListener(this);
         registerForContextMenu(notesListView);
     }
 
@@ -80,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 intent.putExtra("note", notes.get(info.position));
                 Integer tmp = info.position;
                 intent.putExtra("index",tmp.toString());
-                startActivityForResult(intent, REQ_CODE_CHILD);
+                startActivityForResult(intent, REQ_CODE_CHILD_UPDATE);
                 return true;
             default:
                 super.onContextItemSelected(item);
@@ -104,6 +119,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Toast.makeText(getApplicationContext(), "Note has successfully created", Toast.LENGTH_LONG).show();
                 }
                 break;
+            case R.id.getServerTimeButton:
+                new AsyncHttpTask().execute(this.URL);
+                break;
             default:
                 break;
         }
@@ -114,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (data == null) {
             return;
         }
-        if(requestCode == REQ_CODE_CHILD) {
+        if(requestCode == REQ_CODE_CHILD_UPDATE) {
             switch (resultCode) {
                 case RESULT_OK:
                     Note note = (Note) data.getExtras().getSerializable("note");
@@ -130,7 +148,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
@@ -139,6 +156,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_settings:
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivityForResult(intent, REQ_CODE_CHILD_SETTINGS);
                 return true;
             case R.id.action_about:
                 AboutDialog aboutDialog = new AboutDialog();
@@ -146,6 +165,87 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 return true;
             default:
                 return true;
+        }
+    }
+
+    public class AsyncHttpTask extends AsyncTask<String, Void, Integer> {
+
+        @Override
+        protected Integer doInBackground(String... params) {
+            InputStream inputStream = null;
+            HttpURLConnection urlConnection = null;
+            Integer result = 0;
+            date = null;
+            try {
+                URL url = new URL(params[0]);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestProperty("Accept", "application/json");
+                urlConnection.setRequestMethod("GET");
+                urlConnection.setConnectTimeout(5000);
+                int statusCode = urlConnection.getResponseCode();
+                if (statusCode ==  200) {
+                    inputStream = new BufferedInputStream(urlConnection.getInputStream());
+                    String response = convertInputStreamToString(inputStream);
+                    parseResult(response);
+                    result = 1;
+                }else{
+                    result = 0;
+                }
+            } catch (Exception e) {
+                result = 0;
+            }finally {
+                if(inputStream!=null){
+                    try {
+                        inputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if(urlConnection!=null){
+                    urlConnection.disconnect();
+                }
+            }
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(Integer result) {
+            if(result == 1){
+                if(StringUtils.isBlank(date)){
+                    Toast.makeText(getApplicationContext(), "Failed to get server time!", Toast.LENGTH_LONG).show();
+                }else{
+                    Toast.makeText(getApplicationContext(), date, Toast.LENGTH_LONG).show();
+                }
+            }else{
+                if(result == 0){
+                    Toast.makeText(getApplicationContext(), "Connection failed!", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+    }
+
+    private String convertInputStreamToString(InputStream inputStream) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
+        String line = "";
+        String result = "";
+        while((line = bufferedReader.readLine()) != null){
+            result += line;
+        }
+        if(inputStream!=null){
+            inputStream.close();
+        }
+        return result;
+    }
+
+    private void parseResult(String result) throws JSONException {
+        try{
+            JSONObject response = new JSONObject(result);
+            if(!StringUtils.isBlank(response.getString("date"))){
+                date = response.getString("date");
+            }
+        }catch (JSONException e){
+            e.printStackTrace();
         }
     }
 
