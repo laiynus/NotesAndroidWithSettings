@@ -2,11 +2,13 @@ package by.khrapovitsky.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,7 +23,6 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,6 +33,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -50,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button createButton = null;
     Button requestButton = null;
     EditText noteText = null;
+    ListView notesListView = null;
     private  final String URL = "http://192.168.43.102:8080/servertime/time/getservertime";
     private String date;
 
@@ -59,11 +62,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        ListView notesListView = (ListView) findViewById(R.id.NotesListView);
-
+        notesListView = (ListView) findViewById(R.id.NotesListView);
         adapter = new ArrayAdapter<Note>(this, android.R.layout.simple_list_item_1, notes);
-
         notesListView.setAdapter(adapter);
         noteText = (EditText) findViewById(R.id.noteText);
         createButton = (Button) findViewById(R.id.action_create);
@@ -71,6 +71,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         requestButton = (Button) findViewById(R.id.getServerTimeButton);
         requestButton.setOnClickListener(this);
         registerForContextMenu(notesListView);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        View view = this.findViewById(android.R.id.content);
+        view.setBackgroundColor(Color.parseColor(preferences.getString("backgroundColor", "WHITE")));
+
     }
 
     @Override
@@ -111,7 +120,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if(StringUtils.isBlank(note)){
                     Toast.makeText(getApplicationContext(), "Note can't be empty", Toast.LENGTH_LONG).show();
                 }else{
-                    notes.add(new Note(note,new Date()));
+                    SimpleDateFormat date = new SimpleDateFormat ("dd.MM.yyyy hh:mm:ss");
+                    notes.add(new Note(note,date.format(new Date())));
                     adapter.notifyDataSetChanged();
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
@@ -161,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 return true;
             case R.id.action_about:
                 AboutDialog aboutDialog = new AboutDialog();
-                aboutDialog.show(getFragmentManager(),"About");
+                aboutDialog.show(getFragmentManager(), "About");
                 return true;
             default:
                 return true;

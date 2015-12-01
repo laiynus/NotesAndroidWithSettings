@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <ListPreference android:title="Background color"
+        android:summary="Select the color of the background"
+        android:key="backgroundColor"
+        android:defaultValue="White"
+        android:entries="@array/listArrayColors"
+        android:entryValues="@array/listValuesColors" />
+    
+    <ListPreference android:title="Buttons color"
+        android:summary="Select the color of the buttons"
+        android:key="buttonsColor"
+        android:defaultValue="Grey"
+        android:entries="@array/listArrayColors"
+        android:entryValues="@array/listValuesColors" />
 
+    <ListPreference android:title="Font size"
+        android:summary="Select the font size"
+        android:key="fontSize"
+        android:entries="@array/listArrayFonts"
+        android:entryValues="@array/listValuesFonts" />
 
-    <EditTextPreference android:title="Your Name"
-        android:key="username"
-        android:summary="Please provide your username"/>
-    <CheckBoxPreference android:title="Application Updates"
-        android:defaultValue="false"
-        android:summary="This option if selected will allow the application to check for latest versions."
-        android:key="applicationUpdates" />
-    <ListPreference android:title="Download Details"
-        android:summary="Select the kind of data that you would like to download"
-        android:key="downloadType"
-        android:defaultValue="1"
-        android:entries="@array/listArray"
-        android:entryValues="@array/listValues" />
 </PreferenceScreen>

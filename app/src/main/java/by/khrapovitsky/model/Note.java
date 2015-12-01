@@ -11,12 +11,18 @@ public class Note implements Serializable{
 
     private Integer id;
     private String noteText;
-    private Date lastDateModify;
+    private String lastDateModify;
 
     public Note(){
     }
 
-    public Note(String noteText, Date lastDateModify) {
+    public Note(Integer id,String noteText, String lastDateModify) {
+        this.id = id;
+        this.noteText = noteText;
+        this.lastDateModify = lastDateModify;
+    }
+
+    public Note(String noteText,String lastDateModify){
         this.id = currentId++;
         this.noteText = noteText;
         this.lastDateModify = lastDateModify;
@@ -38,17 +44,16 @@ public class Note implements Serializable{
         this.noteText = noteText;
     }
 
-    public Date getLastDateModify() {
+    public String getLastDateModify() {
         return lastDateModify;
     }
 
-    public void setLastDateModify(Date lastDateModify) {
+    public void setLastDateModify(String lastDateModify) {
         this.lastDateModify = lastDateModify;
     }
 
     @Override
     public String toString() {
-        SimpleDateFormat date = new SimpleDateFormat ("dd.MM.yyyy hh:mm:ss");
-        return this.id + ". " + this.noteText + " [Date: " + date.format(this.lastDateModify) + "]";
+        return this.id + ". " + this.noteText + " [Date: " + this.lastDateModify + "]";
     }
 }

@@ -9,4 +9,5 @@
     <string name="action_about">About</string>
     <string name="about_app">NotesApp provide you to manage your notes \nDeveloper: Roman Khrapovitsky</string>
     <string name="action_server_time">What time is it on the server?</string>
+    <string name="save_preferences">Save</string>
 </resources>

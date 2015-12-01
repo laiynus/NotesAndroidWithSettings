@@ -1,14 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="listArray">
-        <item>Headings</item>
-        <item>Headings and Details</item>
-        <item>All Data</item>
+    <string-array name="listArrayColors">
+        <item>Red</item>
+        <item>Green</item>
+        <item>Blue</item>
+        <item>White</item>
+        <item>Gray</item>
     </string-array>
 
-    <string-array name="listValues">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
+    <string-array name="listValuesColors">
+        <item>RED</item>
+        <item>GREEN</item>
+        <item>BLUE</item>
+        <item>WHITE</item>
+        <item>GRAY</item>
+    </string-array>
+
+    <string-array name="listArrayFonts">
+        <item>Small</item>
+        <item>Medium</item>
+        <item>Large</item>
+    </string-array>
+
+    <string-array name="listValuesFonts">
+        <item>Small</item>
+        <item>Medium</item>
+        <item>Large</item>
     </string-array>
 </resources>

@@ -2,6 +2,9 @@ package by.khrapovitsky.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -51,6 +54,16 @@ public class UpdateNoteActivity extends AppCompatActivity implements View.OnClic
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        View view = this.findViewById(android.R.id.content);
+        view.setBackgroundColor(Color.parseColor(preferences.getString("backgroundColor", "WHITE")));
+       // int buttonColor = Color.parseColor(preferences.getString("buttonsColor", "LTGRAY"));
+       // updateButton.setBackgroundColor(buttonColor);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -70,7 +83,8 @@ public class UpdateNoteActivity extends AppCompatActivity implements View.OnClic
                     Toast.makeText(getApplicationContext(), "Note can't be empty", Toast.LENGTH_LONG).show();
                 }else{
                     note.setNoteText(noteTmp);
-                    note.setLastDateModify(new Date());
+                    SimpleDateFormat date = new SimpleDateFormat ("dd.MM.yyyy hh:mm:ss");
+                    note.setLastDateModify(date.format(new Date()));
                     Intent resultIntent = new Intent();
                     setResult(Activity.RESULT_OK, resultIntent);
                     resultIntent.putExtra("note", note);
